@@ -6,12 +6,10 @@ const Nightmare = require("nightmare");
 Nightmare.Promise = Q.Promise;
 /////
 
-const nightmare = new Nightmare();
-
 function getItemsListPageNumber(){
 	const url = "https://www.google.fr/search?q=plop";
 	console.log("Visiting url : "+url);
-	return nightmare
+	return new Nightmare()
         .goto(url)
         .wait()
         .inject("js", "node_modules/jquery/dist/jquery.js")
@@ -58,7 +56,7 @@ function getItemsListsForPages(pageNumber){
 
 function getItemsListForPage(url){
 	console.log("crawling url : "+url);
-	return nightmare
+	return new Nightmare()
         .goto(url)
         .wait()
         .inject("js", "node_modules/jquery/dist/jquery.js")
@@ -90,41 +88,7 @@ function getItemsListForPage(url){
 
 function workingAsExpected(){
 
-	//proof that the crawling of page number 1 is working
-	//and that allSettled with only one promise to wait is working
-    return getItemsListsForPages(1) //number of pages to crawl
-		.then(function(results){
-			console.log("getItemsListsForPages fullfilled with results : "+JSON.stringify(results, null, 4));
-			return results;
-		}, function(error){
-			console.log("getItemsListsForPages rejected with error : "+error);
-		});
-
-	//proof that the crawling of the page number is working
-	/*return getItemsListPageNumber()
-		.then(function(result){
-			console.log("pageNumber : "+result);
-			return getPrintersListsForPages(1);			
-		})
-		.then(function(results){
-			console.log("coucou2 "+results);
-			return results;
-		});*/
-
-}
-
-function notWorkingAsExpected(){
-
-	//shows that allSettled with more than one promise to wait isn't working
-    return getItemsListsForPages(2) //number of pages to crawl
-		.then(function(results){
-			console.log("getItemsListsForPages fullfilled with results : "+JSON.stringify(results, null, 4));
-			return results;
-		}, function(error){
-			console.log("getItemsListsForPages rejected with error : "+error);
-		});
-
-	//this is the final objective, aka what i expect to make work :
+	//this is the final objective :
 	//should display the crawled content of all crawled pages in one array
 	/*return getItemsListPageNumber()
 		.then(function(result){
@@ -141,18 +105,14 @@ function notWorkingAsExpected(){
 		});*/
 
 	//same final test but with a more compact syntax
-	/*return getItemsListPageNumber()
-	    .then(getItemsListsForPages);*/
+	return getItemsListPageNumber()
+	    .then(getItemsListsForPages);
 
 }
 
-
 Q.try(function(){
 
-	//comment the workingBlock and execute the notWorkingBlock or vice versa
-
-	///// WORKING BLOCK
-	/*var workingAsExpectedPromise = workingAsExpected();
+	var workingAsExpectedPromise = workingAsExpected();
 	console.log("workingAsExpected return : " +workingAsExpectedPromise);
 
 	workingAsExpectedPromise
@@ -160,17 +120,6 @@ Q.try(function(){
 		console.log("workingAsExpected main success : "+JSON.stringify(success, null, 4)); //return an array containing the results from all the crawled pages
 	}, function(error){
 		console.log("workingAsExpected main error : "+error);
-	}).done();*/
-
-	///// NOT WORKING BLOCK
-	var notWorkingAsExpectedPromise = notWorkingAsExpected();
-	console.log("notWorkingAsExpected return : " +notWorkingAsExpectedPromise);
-
-	notWorkingAsExpectedPromise
-	.then(function(success){
-		console.log("notWorkingAsExpected main success : "+JSON.stringify(success, null, 4));
-	}, function(error){
-		console.log("notWorkingAsExpected main error : "+error);
 	}).done();
 
 }).catch(function(e){
